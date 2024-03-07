@@ -4,6 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+
+#include "GameFramework/SpringArmComponent.h"
+#include "Camera/CameraComponent.h"
+
 #include "PotatoMasherCharacter.generated.h"
 
 UCLASS()
@@ -25,5 +29,14 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+private:
+	// ==== Components ====
+	// Camera
+	UPROPERTY(EditAnywhere)
+	class USpringArmComponent* CameraBoom;
+
+	UPROPERTY(EditAnywhere)
+	class UCameraComponent* Camera;
 
 };
