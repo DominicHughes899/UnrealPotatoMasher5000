@@ -12,6 +12,8 @@
 #include "Components/BoxComponent.h"
 //#include "Components/WidgetComponent.h"
 
+#include "../InteractionInterface.h"
+
 
 // Sets default values
 APotatoMasherCharacter::APotatoMasherCharacter()
@@ -36,6 +38,8 @@ APotatoMasherCharacter::APotatoMasherCharacter()
 	// Interaction Detection Box
 	InteractionDetectionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("InteractionDetectionBox"));
 	InteractionDetectionBox->SetupAttachment(RootComponent);
+	InteractionDetectionBox->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	InteractionDetectionBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel1, ECollisionResponse::ECR_Overlap);
 
 	// Floating Hand
 
@@ -46,6 +50,7 @@ void APotatoMasherCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// Setup input mapping context
 	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
@@ -54,6 +59,9 @@ void APotatoMasherCharacter::BeginPlay()
 		}
 	}
 	
+	// Bind Overlap Functions
+	OnActorBeginOverlap.AddDynamic(this, &APotatoMasherCharacter::OnOverlapBegin);
+	OnActorEndOverlap.AddDynamic(this, &APotatoMasherCharacter::OnOverlapEnd);
 }
 
 void APotatoMasherCharacter::MoveForward(const FInputActionValue& Value)
@@ -77,6 +85,15 @@ void APotatoMasherCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	// Focus Interactables
+	if (FocusChanged())
+	{
+		if (FocusedInteractable)
+		{
+			FocusedInteractable->Focus();
+		}
+	}
+
 }
 
 // Called to bind functionality to input
@@ -90,5 +107,83 @@ void APotatoMasherCharacter::SetupPlayerInputComponent(UInputComponent* PlayerIn
 		EnhancedInputComponent->BindAction(MoveRightAction, ETriggerEvent::Triggered, this, &APotatoMasherCharacter::MoveRight);
 	}
 
+}
+
+void APotatoMasherCharacter::OnOverlapBegin(AActor* OverlappedActor, AActor* OtherActor)
+{
+	IInteractionInterface* OverlappedInterface = Cast<IInteractionInterface>(OtherActor);
+
+	if (OverlappedInterface)
+	{
+		InteractablesInRange.Add(OverlappedInterface);
+	}
+}
+
+void APotatoMasherCharacter::OnOverlapEnd(AActor* OverlappedActor, AActor* OtherActor)
+{
+	IInteractionInterface* OverlappedInterface = Cast<IInteractionInterface>(OtherActor);
+
+	if (OverlappedInterface && InteractablesInRange.Num() > 0)
+	{
+		InteractablesInRange.Remove(OverlappedInterface);
+	}
+}
+
+bool APotatoMasherCharacter::FocusChanged()
+{
+	IInteractionInterface* ClosestInteractable = FindClosestInteractable();
+
+	if (ClosestInteractable == FocusedInteractable)
+	{
+		return false;
+	}
+	else
+	{
+		if (FocusedInteractable)
+		{
+			FocusedInteractable->UnFocus();
+		}
+
+		FocusedInteractable = ClosestInteractable;
+
+		return true;
+	}
+}
+
+IInteractionInterface* APotatoMasherCharacter::FindClosestInteractable()
+{
+	int NumberOfInteractables = InteractablesInRange.Num();
+
+	if (NumberOfInteractables == 0)
+	{
+		return nullptr;
+	}
+	else if (NumberOfInteractables == 1)
+	{
+		return  InteractablesInRange[0];
+	}
+	else
+	{
+		IInteractionInterface* ClosestFound = nullptr;
+		float ClosestDistance = 500.f;
+		FVector PlayerLocation = GetActorLocation();
+
+		for (IInteractionInterface* InterfacePtr : InteractablesInRange)
+		{
+			FVector InteractableLocation = InterfacePtr->GetLocation();
+
+			if (InteractableLocation != FVector::ZeroVector)
+			{
+				float DistanceToInteractable = FVector::Distance(PlayerLocation, InteractableLocation);
+
+				if (DistanceToInteractable < ClosestDistance)
+				{
+					ClosestDistance = DistanceToInteractable;
+					ClosestFound = InterfacePtr;
+				}
+			}
+		}
+		return ClosestFound;
+	}
 }
 

@@ -17,6 +17,8 @@ class USpringArmComponent;
 class UCameraComponent;
 class UBoxComponent;
 
+class IInteractionInterface;
+
 
 UCLASS()
 class POTATOMASHER5000_API APotatoMasherCharacter : public ACharacter
@@ -74,5 +76,16 @@ private:
 	UPROPERTY(EditAnywhere)
 	class USpringArmComponent* HandBoom;
 
+	// ==== Interaction ====
+	UFUNCTION()
+	void OnOverlapBegin(AActor* OverlappedActor, AActor* OtherActor);
 
+	UFUNCTION()
+	void OnOverlapEnd(AActor* OverlappedActor, AActor* OtherActor);
+
+	bool FocusChanged();
+	IInteractionInterface* FindClosestInteractable();
+
+	TArray<IInteractionInterface*> InteractablesInRange;
+	IInteractionInterface* FocusedInteractable;
 };

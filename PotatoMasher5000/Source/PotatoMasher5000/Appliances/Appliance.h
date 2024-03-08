@@ -6,16 +6,17 @@
 #include "GameFramework/Actor.h"
 #include "../InteractionInterface.h"
 
-#include "Ingredient.generated.h"
+
+#include "Appliance.generated.h"
 
 UCLASS()
-class POTATOMASHER5000_API AIngredient : public AActor, public IInteractionInterface
+class POTATOMASHER5000_API AAppliance : public AActor, public IInteractionInterface
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
-	AIngredient();
+	AAppliance();
 
 protected:
 	// Called when the game starts or when spawned
@@ -26,19 +27,19 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	// ==== Interface overrides ====
-	void Focus() override;
-	void UnFocus() override;
-	FVector GetLocation() const override { return GetActorLocation(); }
 
-protected:
-	// ==== Component Setup ====
+private:
+	// ==== Component setup ====
 	UPROPERTY(EditAnywhere)
 	UStaticMeshComponent* MeshComponent;
 
-	// UI
+	UPROPERTY(EditAnywhere)
+	USceneComponent* AttachLocationComponent;
 
+	// ==== Item limit ====
+	int ItemsAllowed = 1;
+	int HeldItems = 0;
 
-
-
+	// ==== Function ====
 
 };
