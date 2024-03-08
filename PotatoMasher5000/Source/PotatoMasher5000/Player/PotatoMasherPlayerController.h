@@ -4,7 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+
+
+
 #include "PotatoMasherPlayerController.generated.h"
+
+
+class IUserInputInterface;
 
 /**
  * 
@@ -14,4 +20,9 @@ class POTATOMASHER5000_API APotatoMasherPlayerController : public APlayerControl
 {
 	GENERATED_BODY()
 	
+protected:
+	virtual void BeginPlay() override;
+
+private:
+
 };

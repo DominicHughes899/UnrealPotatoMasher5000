@@ -1,14 +1,22 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
+
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 
-#include "GameFramework/SpringArmComponent.h"
-#include "Camera/CameraComponent.h"
+#include "InputActionValue.h"
 
 #include "PotatoMasherCharacter.generated.h"
+
+class UInputMappingContext;
+class UInputAction;
+
+class USpringArmComponent;
+class UCameraComponent;
+class UBoxComponent;
+
 
 UCLASS()
 class POTATOMASHER5000_API APotatoMasherCharacter : public ACharacter
@@ -23,6 +31,22 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	// ==== Input Handler ====
+	// Set in BP
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	UInputMappingContext* PlayerMappingContext;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	UInputAction* MoveForwardAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	UInputAction* MoveRightAction;
+
+	void MoveForward(const FInputActionValue& Value);
+
+	void MoveRight(const FInputActionValue& Value);
+
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -31,6 +55,8 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 private:
+
+
 	// ==== Components ====
 	// Camera
 	UPROPERTY(EditAnywhere)
@@ -38,5 +64,15 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	class UCameraComponent* Camera;
+	
+
+	// Interaction Detection Box
+	UPROPERTY(EditAnywhere)
+	UBoxComponent* InteractionDetectionBox;
+
+	// Floating Hand
+	UPROPERTY(EditAnywhere)
+	class USpringArmComponent* HandBoom;
+
 
 };

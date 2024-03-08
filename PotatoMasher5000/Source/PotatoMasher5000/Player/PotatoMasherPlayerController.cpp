@@ -3,3 +3,6 @@
 
 #include "PotatoMasherPlayerController.h"
 
+void APotatoMasherPlayerController::BeginPlay()
+{
+}
