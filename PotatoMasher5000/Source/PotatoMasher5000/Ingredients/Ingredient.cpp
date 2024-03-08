@@ -11,6 +11,7 @@ AIngredient::AIngredient()
 
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
 	RootComponent = MeshComponent;
+	MeshComponent->SetCollisionObjectType(ECollisionChannel::ECC_GameTraceChannel1);
 
 
 

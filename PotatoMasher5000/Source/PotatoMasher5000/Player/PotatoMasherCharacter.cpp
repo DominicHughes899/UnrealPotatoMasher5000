@@ -27,6 +27,7 @@ APotatoMasherCharacter::APotatoMasherCharacter()
 	CameraBoom->TargetArmLength = 2000.f;
 	CameraBoom->bEnableCameraLag = true;
 	CameraBoom->CameraLagSpeed = 2.f;
+	CameraBoom->bDoCollisionTest = false;
 
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(CameraBoom);
