@@ -23,4 +23,15 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+private:
+	// ==== Component Setup ====
+	UPROPERTY(EditAnywhere)
+	UStaticMeshComponent* MeshComponent;
+
+	// UI
+
+	// ==== Interface overrides ====
+
+
+
 };
