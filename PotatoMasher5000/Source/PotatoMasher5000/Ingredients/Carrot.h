@@ -22,4 +22,14 @@ private:
 	UStaticMesh* UnprocessedMesh;
 	UStaticMesh* ChoppedMesh;
 	UStaticMesh* DicedMesh;
+
+public:
+	void TriggerInteraction() override;
+
+private:
+	// ==== Interaction handlers ====
+	void Interaction_Cut();
+	void Interaction_Roast();
+	void Interaction_Boil();
+
 };

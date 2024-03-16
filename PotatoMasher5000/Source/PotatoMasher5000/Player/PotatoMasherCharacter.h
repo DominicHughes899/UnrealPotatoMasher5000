@@ -44,10 +44,29 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	UInputAction* MoveRightAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	UInputAction* PickUpAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	UInputAction* InteractAction;
+
 	void MoveForward(const FInputActionValue& Value);
 
 	void MoveRight(const FInputActionValue& Value);
 
+	void PickUpPutDown(const FInputActionValue& Value);
+
+	void Interact(const FInputActionValue& Value);
+
+	// ==== Blueprint Functions ====
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnBeginInteraction();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnUpdateTimer(float CompletionPercent);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnEndInteraction();
 
 public:	
 	// Called every frame
@@ -57,8 +76,6 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 private:
-
-
 	// ==== Components ====
 	// Camera
 	UPROPERTY(EditAnywhere)
@@ -76,6 +93,7 @@ private:
 	UPROPERTY(EditAnywhere)
 	class USpringArmComponent* HandBoom;
 
+
 	// ==== Interaction ====
 	UFUNCTION()
 	void OnOverlapBegin(AActor* OverlappedActor, AActor* OtherActor);
@@ -88,4 +106,25 @@ private:
 
 	TArray<IInteractionInterface*> InteractablesInRange;
 	IInteractionInterface* FocusedInteractable;
+
+	void SetCanFocusAppliance(bool NewCanFocus);
+	
+	// Input handlers
+	void BeginInteraction();
+	void TickInteraction(float DeltaTime);
+	void EndInteraction();
+
+	void TriggerInteraction(bool Completed);
+
+	bool IsInteracting = false;
+	float CurrentFunctionDuration = 0.f;
+	float InteractionProgressTimer = 0.f;
+
+
+	// ==== Holding Items ====
+	
+	void PickUp();
+	void PutDown();
+	AActor* HeldItem = nullptr;
+
 };

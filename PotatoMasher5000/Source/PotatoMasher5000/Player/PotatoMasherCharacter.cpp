@@ -26,14 +26,14 @@ APotatoMasherCharacter::APotatoMasherCharacter()
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
 	CameraBoom->SetRelativeRotation(FRotator(-50.f, 0.f, 0.f));
-	CameraBoom->TargetArmLength = 2000.f;
+	CameraBoom->TargetArmLength = 1500.f;
 	CameraBoom->bEnableCameraLag = true;
 	CameraBoom->CameraLagSpeed = 2.f;
 	CameraBoom->bDoCollisionTest = false;
 
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(CameraBoom);
-	Camera->FieldOfView = 80.f;
+	Camera->FieldOfView = 60.f;
 
 	// Interaction Detection Box
 	InteractionDetectionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("InteractionDetectionBox"));
@@ -42,6 +42,16 @@ APotatoMasherCharacter::APotatoMasherCharacter()
 	InteractionDetectionBox->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel1, ECollisionResponse::ECR_Overlap);
 
 	// Floating Hand
+	HandBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("HandBoom"));
+	HandBoom->SetupAttachment(RootComponent);
+	HandBoom->AddRelativeRotation(FRotator(0.f, 90.f, 0.f));
+	HandBoom->AddLocalOffset(FVector(0.f, 0.f, 100.f));
+	HandBoom->TargetArmLength = 50.f;
+	HandBoom->bDoCollisionTest = false;
+	HandBoom->bEnableCameraLag = true;
+	HandBoom->CameraLagSpeed = 2.f;
+	HandBoom ->bEnableCameraRotationLag = true;
+	HandBoom->CameraRotationLagSpeed = 0.5f;
 
 }
 
@@ -80,6 +90,82 @@ void APotatoMasherCharacter::MoveRight(const FInputActionValue& Value)
 	}
 }
 
+void APotatoMasherCharacter::PickUpPutDown(const FInputActionValue& Value)
+{
+	if (HeldItem == nullptr)
+	{
+		PickUp();
+	}
+	else
+	{
+		PutDown();
+	}
+}
+
+void APotatoMasherCharacter::Interact(const FInputActionValue& Value)
+{
+	if (Value.Get<bool>())
+	{
+		BeginInteraction();
+	}
+	else
+	{
+		EndInteraction();
+	}
+}
+
+void APotatoMasherCharacter::BeginInteraction()
+{
+	if (FocusedInteractable && FocusedInteractable->CanStartInteraction())
+	{
+		IsInteracting = true;
+		CurrentFunctionDuration = FocusedInteractable->GetFunctionDuration();
+
+		OnBeginInteraction();
+	}
+}
+
+void APotatoMasherCharacter::TickInteraction(float DeltaTime)
+{
+	InteractionProgressTimer += DeltaTime;
+	float CurrentProgress = InteractionProgressTimer / CurrentFunctionDuration;
+
+	OnUpdateTimer(CurrentProgress);
+
+	if (CurrentProgress >= 1.f)
+	{
+		TriggerInteraction(true);
+	}
+}
+
+void APotatoMasherCharacter::EndInteraction()
+{
+	if (IsInteracting)
+	{
+		TriggerInteraction(false);
+	}
+}
+
+void APotatoMasherCharacter::TriggerInteraction(bool Completed)
+{
+	InteractionProgressTimer = 0.f;
+	IsInteracting = false;
+
+	if (Completed && FocusedInteractable)
+	{
+		FocusedInteractable->TriggerInteraction();
+	}
+
+	if (FocusedInteractable)
+	{
+		FocusedInteractable->CancelInteraction();
+	}
+
+	OnEndInteraction();
+}
+
+
+
 // Called every frame
 void APotatoMasherCharacter::Tick(float DeltaTime)
 {
@@ -94,6 +180,10 @@ void APotatoMasherCharacter::Tick(float DeltaTime)
 		}
 	}
 
+	if (IsInteracting)
+	{
+		TickInteraction(DeltaTime);
+	}
 }
 
 // Called to bind functionality to input
@@ -105,6 +195,8 @@ void APotatoMasherCharacter::SetupPlayerInputComponent(UInputComponent* PlayerIn
 	{
 		EnhancedInputComponent->BindAction(MoveForwardAction, ETriggerEvent::Triggered, this, &APotatoMasherCharacter::MoveForward);
 		EnhancedInputComponent->BindAction(MoveRightAction, ETriggerEvent::Triggered, this, &APotatoMasherCharacter::MoveRight);
+		EnhancedInputComponent->BindAction(PickUpAction, ETriggerEvent::Started, this, &APotatoMasherCharacter::PickUpPutDown);
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &APotatoMasherCharacter::Interact);
 	}
 
 }
@@ -184,6 +276,69 @@ IInteractionInterface* APotatoMasherCharacter::FindClosestInteractable()
 			}
 		}
 		return ClosestFound;
+	}
+}
+
+void APotatoMasherCharacter::SetCanFocusAppliance(bool NewCanFocus)
+{
+	if (NewCanFocus)
+	{
+		InteractionDetectionBox->SetCollisionResponseToChannel(ECC_GameTraceChannel2, ECollisionResponse::ECR_Overlap);
+		InteractionDetectionBox->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECollisionResponse::ECR_Ignore);
+	}
+	else
+	{
+		InteractionDetectionBox->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECollisionResponse::ECR_Overlap);
+		InteractionDetectionBox->SetCollisionResponseToChannel(ECC_GameTraceChannel2, ECollisionResponse::ECR_Ignore);
+	}
+}
+
+void APotatoMasherCharacter::PickUp()
+{
+	if (FocusedInteractable)
+	{
+		if (AActor* AsActor = Cast<AActor>(FocusedInteractable))
+		{
+			FocusedInteractable->OnPickUp();
+
+			IInteractionInterface* PickedUpFrom = Cast<IInteractionInterface>(FocusedInteractable->GetCurrentAppliance());
+			if (PickedUpFrom)
+			{
+				PickedUpFrom->OnActorDetached(AsActor);
+			}
+
+
+			AsActor->AttachToComponent(HandBoom, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+			HeldItem = AsActor;
+
+			SetCanFocusAppliance(true);
+
+		}
+	}
+
+}
+
+void APotatoMasherCharacter::PutDown()
+{
+	if (FocusedInteractable && FocusedInteractable->CanReceiveItem(HeldItem))
+	{
+		if (USceneComponent* ComponentToAttachTo = FocusedInteractable->GetAttachComponent())
+		{
+			HeldItem->AttachToComponent(ComponentToAttachTo, FAttachmentTransformRules::SnapToTargetIncludingScale);
+
+			IInteractionInterface* HeldItemInterface = Cast<IInteractionInterface>(HeldItem);
+			if (HeldItemInterface)
+			{
+				HeldItemInterface->OnPutDown();
+				HeldItemInterface->UpdateCurrentAppliance(Cast<AActor>(FocusedInteractable));
+			}
+
+			FocusedInteractable->OnActorAttached(HeldItem);
+			
+			HeldItem = nullptr;
+
+			SetCanFocusAppliance(false);
+		}
 	}
 }
 

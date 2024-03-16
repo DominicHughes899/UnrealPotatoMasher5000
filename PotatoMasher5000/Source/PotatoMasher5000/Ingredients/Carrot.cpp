@@ -42,4 +42,74 @@ ACarrot::ACarrot()
         UE_LOG(LogTemp, Warning, TEXT("Failed to load Carrot Diced mesh!"));
     }
 
+    // Add To allowed functions
+    AllowedFunctions.Add(EApplianceFunctionEnum::Cut);
+    AllowedFunctions.Add(EApplianceFunctionEnum::Roast);
+    AllowedFunctions.Add(EApplianceFunctionEnum::Boil);
+
+    // Set default ingredient information
+    IngredientInformation.Name = EIngredientName::Carrot;
+}
+
+void ACarrot::TriggerInteraction()
+{
+    if (CurrentApplianceInterface)
+    {
+        EApplianceFunctionEnum ApplianceFunction = CurrentApplianceInterface->GetApplianceFunction();
+
+        if (ApplianceFunction == EApplianceFunctionEnum::Cut)
+        {
+            Interaction_Cut();
+        }
+        else if (ApplianceFunction == EApplianceFunctionEnum::Roast)
+        {
+            Interaction_Roast();
+        }
+        else if (ApplianceFunction == EApplianceFunctionEnum::Boil)
+        {
+            Interaction_Boil();
+        }
+    }
+}
+
+void ACarrot::Interaction_Cut()
+{
+    EProcessedState& ProcessedState = IngredientInformation.ProcessedState;
+
+    if (ProcessedState == EProcessedState::Unprocessed)
+    {
+        ProcessedState = EProcessedState::Chopped;
+        MeshComponent->SetStaticMesh(ChoppedMesh);
+    }
+    else if (ProcessedState == EProcessedState::Chopped)
+    {
+        ProcessedState = EProcessedState::Diced;
+        MeshComponent->SetStaticMesh(DicedMesh);
+
+        AllowedFunctions.Remove(EApplianceFunctionEnum::Cut);
+    }
+}
+
+void ACarrot::Interaction_Roast()
+{
+    ECookedState& CookedState = IngredientInformation.CookedState;
+
+    if (CookedState == ECookedState::Raw)
+    {
+        CookedState = ECookedState::Roasted;
+
+        LockInteraction();
+    }
+}
+
+void ACarrot::Interaction_Boil()
+{
+    ECookedState& CookedState = IngredientInformation.CookedState;
+
+    if (CookedState == ECookedState::Raw)
+    {
+        CookedState = ECookedState::Boiled;
+
+        LockInteraction();
+    }
 }

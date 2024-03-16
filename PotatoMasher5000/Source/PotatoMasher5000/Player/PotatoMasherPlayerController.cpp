@@ -5,4 +5,7 @@
 
 void APotatoMasherPlayerController::BeginPlay()
 {
+	Super::BeginPlay();
+
+
 }
