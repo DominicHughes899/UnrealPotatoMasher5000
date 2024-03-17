@@ -99,7 +99,7 @@ void AIngredient::Focus()
 			}
 		}
 
-		InteractionUI->OnPlayerFocus(ShouldShowInteraction, ApplianceFunction, IngredientInformation);
+		InteractionUI->OnPlayerFocus(ShouldShowInteraction, ApplianceFunction, IngredientInformation, PackagedType);
 	}
 }
 

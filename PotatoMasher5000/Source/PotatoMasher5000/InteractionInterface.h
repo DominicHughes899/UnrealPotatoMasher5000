@@ -6,6 +6,7 @@
 #include "UObject/Interface.h"
 
 #include "Appliances/ApplianceFunctionEnum.h"
+#include "Ingredients/IngredientStruct.h"
 
 #include "InteractionInterface.generated.h"
 
@@ -60,6 +61,9 @@ public:
 
 	UFUNCTION()
 	virtual void TriggerInteraction() {}
+
+	UFUNCTION()
+	virtual FIngredientStruct GetIngredientInformation() { return FIngredientStruct(); }
 
 
 	// ==== Appliance ====

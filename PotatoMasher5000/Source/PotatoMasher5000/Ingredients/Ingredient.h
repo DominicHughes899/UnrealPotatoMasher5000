@@ -44,6 +44,7 @@ public:
 	AActor* GetCurrentAppliance() override { return CurrentAppliance; }
 	bool CanStartInteraction() override;
 	void CancelInteraction() override;
+	FIngredientStruct GetIngredientInformation() override { return IngredientInformation; }
 
 
 protected:
@@ -75,6 +76,9 @@ protected:
 
 	// ==== Ingredient State ====
 	FIngredientStruct IngredientInformation;
+
+	// ==== Packaged Only ====
+	EPackagedType PackagedType = EPackagedType::None;
 
 private:
 

@@ -32,5 +32,6 @@ UENUM(BlueprintType)
 enum class EPackagedType : uint8
 {
 	None,
-	DicedCarrots
+	DicedCarrots,
+	RoastedDicedCarrots
 };

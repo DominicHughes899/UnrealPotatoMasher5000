@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 
 #include "../Appliances/ApplianceFunctionEnum.h"
+#include "../Ingredients/RecipeStruct.h"
 
 #include "ApplianceInteractionPromptUI.generated.h"
 
@@ -29,4 +30,9 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void AccessDenied();
+
+	// Packaging Station Only
+	UFUNCTION(BlueprintImplementableEvent)
+	void SetRecipe(FRecipeStruct Recipe);
+
 };

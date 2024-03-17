@@ -6,25 +6,32 @@
 #include "Blueprint/UserWidget.h"
 
 #include "../Appliances/ApplianceFunctionEnum.h"
-#include "../Ingredients/IngredientStruct.h"
 
-#include "InteractionPromptUI.generated.h"
+#include "ApplianceInteractionPromptUI.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class POTATOMASHER5000_API UInteractionPromptUI : public UUserWidget
+class POTATOMASHER5000_API UApplianceInteractionPromptUI : public UUserWidget
 {
 	GENERATED_BODY()
-	
+
 public:
 	UFUNCTION(BlueprintImplementableEvent)
-	void OnPlayerFocus(bool InteractVisible, EApplianceFunctionEnum ApplianceFunction, FIngredientStruct IngredientInformation, EPackagedType PackagedType);
+	void SetTitle(EApplianceName NewTitle);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnPlayerFocus();
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnPlayerUnfocus();
 
 	UFUNCTION(BlueprintImplementableEvent)
-	void OnIngredientLocked();
+	void AccessDenied();
+
+	// Packaging Station Only
+	UFUNCTION(BlueprintImplementableEvent)
+	void SetRecipe();
+
 };
