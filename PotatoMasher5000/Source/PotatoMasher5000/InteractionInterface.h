@@ -39,6 +39,9 @@ public:
 	UFUNCTION()
 	virtual float GetFunctionDuration() { return 0.f; }
 
+	UFUNCTION()
+	virtual bool GetIsAppliance() { return false; }
+
 
 	// ==== Ingredient ====
 	UFUNCTION()

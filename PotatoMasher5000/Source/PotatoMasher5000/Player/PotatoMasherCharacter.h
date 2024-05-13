@@ -108,6 +108,7 @@ private:
 	IInteractionInterface* FocusedInteractable;
 
 	void SetCanFocusAppliance(bool NewCanFocus);
+	bool FocusingAppliance = false;
 	
 	// Input handlers
 	void BeginInteraction();

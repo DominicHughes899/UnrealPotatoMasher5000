@@ -15,10 +15,10 @@ struct FRecipeStruct
 {
 	GENERATED_BODY()
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly)
 	TArray<FIngredientStruct> Ingredients;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly)
 	EPackagedType PackagedType;
 
 };

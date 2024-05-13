@@ -205,6 +205,13 @@ void APotatoMasherCharacter::OnOverlapBegin(AActor* OverlappedActor, AActor* Oth
 {
 	IInteractionInterface* OverlappedInterface = Cast<IInteractionInterface>(OtherActor);
 
+	/*
+	if (OverlappedInterface->GetIsAppliance() && !FocusingAppliance)
+	{
+		return;
+	}
+	*/
+
 	if (OverlappedInterface)
 	{
 		InteractablesInRange.Add(OverlappedInterface);
@@ -215,10 +222,35 @@ void APotatoMasherCharacter::OnOverlapEnd(AActor* OverlappedActor, AActor* Other
 {
 	IInteractionInterface* OverlappedInterface = Cast<IInteractionInterface>(OtherActor);
 
+	/*
+	if (OverlappedInterface && InteractablesInRange.Num() != 0)
+	{
+		int index = 0;
+		bool ShouldRemove = false;
+
+		for(IInteractionInterface* Interface : InteractablesInRange)
+		{
+			if (Interface == OverlappedInterface)
+			{
+				ShouldRemove = true;
+				break;
+			}
+
+			index++;
+		}
+
+		if (ShouldRemove)
+		{
+			InteractablesInRange.RemoveAt(index);
+		}
+	}
+		*/
+
 	if (OverlappedInterface && InteractablesInRange.Num() > 0)
 	{
 		InteractablesInRange.Remove(OverlappedInterface);
 	}
+
 }
 
 bool APotatoMasherCharacter::FocusChanged()
@@ -285,17 +317,23 @@ void APotatoMasherCharacter::SetCanFocusAppliance(bool NewCanFocus)
 	{
 		InteractionDetectionBox->SetCollisionResponseToChannel(ECC_GameTraceChannel2, ECollisionResponse::ECR_Overlap);
 		InteractionDetectionBox->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECollisionResponse::ECR_Ignore);
+
+		FocusingAppliance = true;
 	}
 	else
 	{
 		InteractionDetectionBox->SetCollisionResponseToChannel(ECC_GameTraceChannel1, ECollisionResponse::ECR_Overlap);
 		InteractionDetectionBox->SetCollisionResponseToChannel(ECC_GameTraceChannel2, ECollisionResponse::ECR_Ignore);
+
+		
+
+		FocusingAppliance = false;
 	}
 }
 
 void APotatoMasherCharacter::PickUp()
 {
-	if (FocusedInteractable)
+	if (FocusedInteractable && !FocusedInteractable->GetIsAppliance())
 	{
 		if (AActor* AsActor = Cast<AActor>(FocusedInteractable))
 		{

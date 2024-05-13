@@ -6,9 +6,12 @@
 #include "Appliance.h"
 
 #include "../Ingredients/IngredientStruct.h"
+#include "../Ingredients/RecipeStruct.h"
 
 #include "PackagingStation.generated.h"
 
+
+class UBoxComponent;
 /**
  * 
  */
@@ -29,14 +32,37 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void PrintInfo(FIngredientStruct InfoToPrint);
 
-private:
+protected:
 
+	// Extra Components
+	// Proximity Detection Box
+	UPROPERTY(EditAnywhere)
+	UBoxComponent* ProximityDetectionBox;
+
+private:
+	// Interface overrides
+	void Focus() override { MeshComponent->SetRenderCustomDepth(true); }
+	void UnFocus() override { MeshComponent->SetRenderCustomDepth(false); }
+
+	// Custom overlap function for UI 
+	UFUNCTION()
+	void OnOverlapBegin(class AActor* OverlappedActor, class AActor* OtherActor);
+
+	UFUNCTION()
+	void OnOverlapEnd(class AActor* OverlappedActor, class AActor* OtherActor);
+
+	// ==== Packaging ====
 	void ResetActiveRecipe();
 	bool CheckNeededForRecipe(const FIngredientStruct& IngredientToCheck);
 	void SpawnPackagedFood();
+	void UpdateUI();
 
-	TArray<FIngredientStruct> OriginalRecipe;
-	TArray<FIngredientStruct> ActiveRecipe;
+	FRecipeStruct OriginalRecipe;
+	FRecipeStruct ActiveRecipe;
+
+	
+	//TArray<FIngredientStruct> OriginalRecipe;
+	//TArray<FIngredientStruct> ActiveRecipe;
 
 	
 

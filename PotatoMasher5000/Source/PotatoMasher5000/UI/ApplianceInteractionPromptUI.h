@@ -33,6 +33,14 @@ public:
 
 	// Packaging Station Only
 	UFUNCTION(BlueprintImplementableEvent)
-	void SetRecipe(FRecipeStruct Recipe);
+	void SetRecipe();
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void ResetRecipe();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void AppendRecipe(int Number, FIngredientStruct Ingredient);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void FinaliseRecipe();
 };

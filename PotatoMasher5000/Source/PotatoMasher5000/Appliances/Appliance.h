@@ -60,6 +60,7 @@ public:
 	void UnFocus() override;
 	FVector GetLocation() const override { return GetActorLocation(); }
 	float GetFunctionDuration() override { return FunctionDuration; }
+	bool GetIsAppliance() override { return true; }
 
 	// Appliance
 	USceneComponent* GetAttachComponent() { return AttachLocationComponent; }
